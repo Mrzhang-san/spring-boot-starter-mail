@@ -2,12 +2,19 @@ package com.hnhe.springbootstartermail;
 
 
 import com.hnhe.springbootstartermail.service.MailService;
+import org.dom4j.Document;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.Iterator;
+import java.util.List;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -74,5 +81,30 @@ public class TestMailSend {
                 "C:\\Users\\user\\Desktop\\ddd\\翻译1.png"
         };
         Assert.assertTrue(mailService.sendWithWithEnclosure(receiver,title,content,filePaths));
+    }
+
+    @Test
+    public void testFileSystemResource() throws Exception {
+        FileSystemResource fs = new FileSystemResource("E:\\IDEA_WORKSPACE\\spring-boot-starter-mail\\src\\main\\resources\\book.xml");
+        System.out.println(fs.getFilename());
+        System.out.println(fs.getDescription());
+        SAXReader reader = new SAXReader();
+        Document doc = reader.read(fs.getFile());
+        //获取根元素
+        Element el = doc.getRootElement();
+        List elements = el.elements();
+        //遍历根节点的所有元素
+        for (Iterator it1 = elements.iterator(); it1.hasNext(); ) {
+            //每个节点都是<书> 节点
+            Element book = (Element) it1.next();
+            List ll = book.elements();
+            for (Iterator it2 = ll.iterator(); it2.hasNext(); ) {
+                Element eee = (Element) it2.next();
+                System.out.println(eee.getText());
+            }
+
+        }
+
+
     }
 }
