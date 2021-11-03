@@ -4,8 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.mail.MailProperties;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import javax.mail.internet.MimeMessage;
 import java.util.Date;
 
 @Service
@@ -41,7 +43,27 @@ public class MailServiceImpl implements MailService{
 
     @Override
     public boolean sendWithHtml(String to, String subject, String html) {
-        return false;
+        System.out.println("准备发送邮件");
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        MimeMessageHelper mimeMessageHelper = null;
+        try {
+            mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
+            //邮件发送来源 发件人
+            mimeMessageHelper.setFrom(mailProperties.getUsername());
+            //邮件发送目标
+            mimeMessageHelper.setTo(to);
+            //邮件主题
+            mimeMessageHelper.setSubject(subject);
+            //设置内容 并设置内容为html格式 true
+            mimeMessageHelper.setText(html, true);
+
+            javaMailSender.send(mimeMessage);
+        } catch (Exception e) {
+            System.out.println("邮件发送失败");
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 
     @Override

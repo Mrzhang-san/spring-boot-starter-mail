@@ -12,6 +12,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class TestMailSend {
+    String receiver = "hnhe@ankki.com";
+    String title = "this is a test mail";
     @Autowired
     private MailService mailService;
 
@@ -20,11 +22,15 @@ public class TestMailSend {
      */
     @Test
     public void send(){
-        String receiver = "hnhe@ankki.com";
-        String title = "this is a test mail";
         String content = "good goog study,and day day up!";
         Assert.assertTrue(mailService.send(receiver,title,content));
 
+    }
+
+    @Test
+    public void sendWithHtml(){
+        String htmlContent= "<html><body><h1>好好学习，天天向上</h1><body></html>";
+        Assert.assertTrue(mailService.sendWithHtml(receiver,title,htmlContent));
     }
 
 }
