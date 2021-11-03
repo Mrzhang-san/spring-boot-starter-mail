@@ -2,6 +2,7 @@ package com.hnhe.springbootstartermail.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.mail.MailProperties;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -45,7 +46,7 @@ public class MailServiceImpl implements MailService{
     public boolean sendWithHtml(String to, String subject, String html) {
         System.out.println("准备发送邮件");
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
-        MimeMessageHelper mimeMessageHelper = null;
+        MimeMessageHelper mimeMessageHelper;
         try {
             mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
             //邮件发送来源 发件人
@@ -68,11 +69,60 @@ public class MailServiceImpl implements MailService{
 
     @Override
     public boolean sendWithPicHtml(String to, String subject, String html, String[] cids, String[] filePaths) {
-        return false;
+        System.out.println("开始发送邮件");
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        MimeMessageHelper mimeMessageHelper;
+                try{
+                    mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
+                    mimeMessageHelper.setFrom(mailProperties.getUsername());
+                    mimeMessageHelper.setTo(to);
+                    mimeMessageHelper.setSubject(subject);
+                    mimeMessageHelper.setText(html,true);
+
+                    //设置html中关联图片
+                    for (int i = 0; i < cids.length; i++) {
+                        FileSystemResource file = new FileSystemResource(filePaths[i]);
+                        // addInline cid 需要html中的cid （content id）对应 才能设置图片成功
+                        mimeMessageHelper.addInline(cids[i],file);
+                    }
+                    javaMailSender.send(mimeMessage);
+                    System.out.println("邮件发送成功！");
+
+                }catch ( Exception e) {
+                    System.out.println("邮件发送异常");
+                    e.printStackTrace();
+                    return false;
+                }
+
+        return true;
     }
 
     @Override
     public boolean sendWithWithEnclosure(String to, String subject, String content, String[] filePaths) {
-        return false;
+        System.out.println("准备开始发送邮件...");
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+
+        MimeMessageHelper mimeMessageHelper;
+        try {
+            mimeMessageHelper = new MimeMessageHelper(mimeMessage,true);
+            mimeMessageHelper.setFrom(mailProperties.getUsername());
+            mimeMessageHelper.setTo(to);
+            mimeMessageHelper.setSubject(subject);
+            mimeMessageHelper.setText(content);
+
+            for (int i = 0; i < filePaths.length; i++) {
+                FileSystemResource file = new FileSystemResource(filePaths[i]);
+                String attachFileName = "附件" +(i+1);
+                mimeMessageHelper.addAttachment(attachFileName,file);
+            }
+            javaMailSender.send(mimeMessage);
+            System.out.println("发送邮件成功");
+        } catch (Exception e) {
+            System.out.println("发送邮件异常");
+            e.printStackTrace();
+            return false;
+        }
+
+        return true;
     }
 }
